@@ -87,3 +87,72 @@ details_data_preprocessing <- function(data,matches,which_bets=c('1x2'),remove_b
   return(details)
 }
 
+
+
+
+getmode <- function(v) {
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+
+
+extract_features.PreviousResults<- function(matches,teststart){
+  
+  matches=matches[match_Date<teststart]
+  
+  DistinctSides= unique(matches[,c('Home','Away'),with=F])
+  DistinctSides[,rowcount:=1:.N]
+  
+  DistinctSides[,TeamsId:=0]
+  for (i in 1:nrow(DistinctSides))
+  { 
+    DistinctSides[( TeamsId==0 & rowcount==i )| (rowcount>i & Home==DistinctSides[i]$Away & Away==DistinctSides[i]$Home), TeamsId:=i]
+  }
+  
+  setnames(DistinctSides,'rowcount','Identical')
+  setkey(DistinctSides,Home,Away)
+  setkey(matches,Home,Away)
+  
+  matches=DistinctSides[matches]
+  
+  matches[,Winner:=ifelse(Match_Result=='Home',Home,'Else')]
+  matches[Winner=='Else',Winner:=ifelse(Match_Result=='Away',Away,'Tie')]
+  
+  PreviousMatches=matches[,c('Match_Date','matchId','Winner','Home','Away','TeamsId'),with=F]
+  
+  matches$Last5IdenticalMatch=NULL
+  matches$Last2IdenticalMatch=NULL
+  matches$Last5TwoWayMatch=NULL
+  matches$Last2TwoWayMatch=NULL
+  matches[,c(7:19):=NULL]
+  
+  PreviousMatches[order(Match_Date),Identical1:=shift(Winner,1,type='lag'),by=c('Home','Away') ]
+  PreviousMatches[order(Match_Date),Identical2:=shift(Winner,2,type='lag'),by=c('Home','Away') ]
+  PreviousMatches[order(Match_Date),Identical3:=shift(Winner,3,type='lag'),by=c('Home','Away') ]
+  PreviousMatches[order(Match_Date),Identical4:=shift(Winner,4,type='lag'),by=c('Home','Away') ]
+  PreviousMatches[order(Match_Date),Identical5:=shift(Winner,5,type='lag'),by=c('Home','Away') ]  
+  PreviousMatches[order(Match_Date),Identical5:=shift(Winner,5,type='lag'),by=c('Home','Away') ]  
+  
+  PreviousMatches[order(Match_Date),TwoWay1:=shift(Winner,1,type='lag'),by=TeamsId ]
+  PreviousMatches[order(Match_Date),TwoWay2:=shift(Winner,2,type='lag'),by=TeamsId ]
+  PreviousMatches[order(Match_Date),TwoWay3:=shift(Winner,3,type='lag'),by=TeamsId ]
+  PreviousMatches[order(Match_Date),TwoWay4:=shift(Winner,4,type='lag'),by=TeamsId ]
+  PreviousMatches[order(Match_Date),TwoWay5:=shift(Winner,5,type='lag'),by=TeamsId ]
+  
+  PreviousMatches$Identical5Freq=apply(PreviousMatches[,c('Identical1','Identical2','Identical3','Identical4','Identical5'),with=F],1,getmode)
+  PreviousMatches$TwoWay5Freq=apply(PreviousMatches[,c('TwoWay1','TwoWay2','TwoWay3','TwoWay4','TwoWay5'),with=F],1,getmode)
+  
+  PreviousMatches$Identical2Freq=apply(PreviousMatches[,c('Identical1','Identical2'),with=F],1,getmode)
+  PreviousMatches$TwoWay2Freq=apply(PreviousMatches[,c('TwoWay1','TwoWay2'),with=F],1,getmode)
+  
+  PreviousMatches$Identical1Freq=apply(PreviousMatches[,c('Identical1'),with=F],1,getmode)
+  PreviousMatches$TwoWay1Freq=apply(PreviousMatches[,c('TwoWay1'),with=F],1,getmode)
+  
+ 
+  PreviousMatches[,c('matchId','Identical5Freq','TwoWay5Freq','Identical2Freq','TwoWay2Freq','Identical1Freq','TwoWay1Freq'),with=F][order(TeamsId,Match_Date)]
+  
+   
+}
+
+
