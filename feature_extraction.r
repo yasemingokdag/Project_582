@@ -237,27 +237,42 @@ extract_features.CombineFeatures <- function(matches,odd_details,pMissThreshold=
   setkey(PreviousResults,matchId)
   Data=PreviousResults[Data]
   
-  Data[Identical5Freq==Away,Identical5Freq:='Away']
-  Data[Identical5Freq==Home,Identical5Freq:='Home']
-  Data[TwoWay5Freq==Away,TwoWay5Freq:='Away']
-  Data[TwoWay5Freq==Home,TwoWay5Freq:='Home']
-  Data[Identical2Freq==Away,Identical2Freq:='Away']
-  Data[Identical2Freq==Home,Identical2Freq:='Home']
-  Data[TwoWay2Freq==Away,TwoWay2Freq:='Away']
-  Data[TwoWay2Freq==Home,TwoWay2Freq:='Home'] 
-  Data[Identical1Freq==Away,Identical1Freq:='Away']
-  Data[Identical1Freq==Home,Identical1Freq:='Home']
-  Data[TwoWay1Freq==Away,TwoWay1Freq:='Away']
-  Data[TwoWay1Freq==Home,TwoWay1Freq:='Home']
-  Data[Identical1Freq==Away,Identical1Freq:='Away']
-  Data[Identical1Freq==Home,Identical1Freq:='Home']
+  Data[Identical5Freq==Away,Identical5Freq:=2]
+  Data[Identical5Freq==Home,Identical5Freq:=1]
+  Data[Identical5Freq=='Tie',Identical5Freq:=0]
+  Data[TwoWay5Freq==Away,TwoWay5Freq:=2]
+  Data[TwoWay5Freq==Home,TwoWay5Freq:=1]
+  Data[TwoWay5Freq=='Tie',TwoWay5Freq:=0]
+  Data[Identical2Freq==Away,Identical2Freq:=2]
+  Data[Identical2Freq==Home,Identical2Freq:=1]
+  Data[Identical2Freq=='Tie',Identical2Freq:=0]
+  Data[TwoWay2Freq==Away,TwoWay2Freq:=2]
+  Data[TwoWay2Freq==Home,TwoWay2Freq:=1] 
+  Data[TwoWay2Freq=='Tie',TwoWay2Freq:=0]
+  Data[Identical1Freq==Away,Identical1Freq:=2]
+  Data[Identical1Freq==Home,Identical1Freq:=1]
+  Data[Identical1Freq=='Tie',Identical1Freq:=0]
+  Data[TwoWay1Freq==Away,TwoWay1Freq:=2]
+  Data[TwoWay1Freq==Home,TwoWay1Freq:=1]
+  Data[TwoWay1Freq=='Tie',TwoWay1Freq:=0]
+
+  
+  Data[AwayResult=='Home',AwayResult:=1]
+  Data[AwayResult=='Away',AwayResult:=2]
+  Data[AwayResult=='Tie',AwayResult:=0]
+  
+  Data[HomeResult=='Home',HomeResult:=1]
+  Data[HomeResult=='Away',HomeResult:=2]
+  Data[HomeResult=='Tie',HomeResult:=0]
+  
+  Data[Identical1Freq=='Tie',Identical1Freq:=0]
   
   setkey(Data,matchId)
   setkey(OddFeatures,matchId)
   Data=Data[OddFeatures]
   Data$Away=NULL
   Data$Home=NULL
-  return(Data)
+  return(as.data.table(Data))
   
 }
 
