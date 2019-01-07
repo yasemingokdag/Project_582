@@ -99,7 +99,7 @@ getmode <- function(v) {
 
 extract_features.PreviousResults<- function(matches,teststart){
   
-  matches=matches[match_Date<teststart]
+  matches=matches[Match_Date<teststart]
   
   DistinctSides= unique(matches[,c('Home','Away'),with=F])
   DistinctSides[,rowcount:=1:.N]
@@ -121,12 +121,7 @@ extract_features.PreviousResults<- function(matches,teststart){
   
   PreviousMatches=matches[,c('Match_Date','matchId','Winner','Home','Away','TeamsId'),with=F]
   
-  matches$Last5IdenticalMatch=NULL
-  matches$Last2IdenticalMatch=NULL
-  matches$Last5TwoWayMatch=NULL
-  matches$Last2TwoWayMatch=NULL
-  matches[,c(7:19):=NULL]
-  
+
   PreviousMatches[order(Match_Date),Identical1:=shift(Winner,1,type='lag'),by=c('Home','Away') ]
   PreviousMatches[order(Match_Date),Identical2:=shift(Winner,2,type='lag'),by=c('Home','Away') ]
   PreviousMatches[order(Match_Date),Identical3:=shift(Winner,3,type='lag'),by=c('Home','Away') ]
@@ -150,8 +145,8 @@ extract_features.PreviousResults<- function(matches,teststart){
   PreviousMatches$TwoWay1Freq=apply(PreviousMatches[,c('TwoWay1'),with=F],1,getmode)
   
  
-  PreviousMatches[,c('matchId','Identical5Freq','TwoWay5Freq','Identical2Freq','TwoWay2Freq','Identical1Freq','TwoWay1Freq'),with=F][order(TeamsId,Match_Date)]
-  
+  PreviousMatches=PreviousMatches[,c('matchId','Identical5Freq','TwoWay5Freq','Identical2Freq','TwoWay2Freq','Identical1Freq','TwoWay1Freq'),with=F]
+  return(PreviousMatches)
    
 }
 
