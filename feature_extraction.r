@@ -363,7 +363,7 @@ extract_features.pcaComponents <- function(features){
   
   for (j in 6:col)
   {
-    scaled_data[,j] <- scale(data[,get(colnames[j])])
+    scaled_data <- cbind(scaled_data, scale(data[,get(colnames[j])]))
     j = j+1
   }
   setnames(scaled_data, colnames)
