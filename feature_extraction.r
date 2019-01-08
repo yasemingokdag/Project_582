@@ -350,9 +350,9 @@ extract_features.CombineFeatures <- function(matches,odd_details,pMissThreshold=
   
 }
 
-extract_features.pcaComponents <- function(features){
-  
-  data <- features
+extract_features.pcaComponents <- function(train_features, test_features){
+
+  data <- train_features
   data <- na.omit(data)
   col <- ncol(data)
   row <- nrow(data)
@@ -372,8 +372,17 @@ extract_features.pcaComponents <- function(features){
   load <- load[,1:12]
   load <- as.matrix(load)
   
-  s <- scaled_data[,1:5]
-  t <- scaled_data[,6:ncol(scaled_data)]
+  scaled_test <- data.table()
+  scaled_test <- rbind(scaled_test,test_features[,1:5])
+  for (j in 6:col)
+  {
+    scaled_test <- cbind(scaled_test, scale(test_features[,get(colnames[j])]))
+    j = j+1
+  }
+  setnames(scaled_test, colnames)
+  
+  s <- scaled_test[,1:5]
+  t <- scaled_test[,6:ncol(scaled_test)]
   t <- as.matrix(t)
   
   r <- t%*%load
@@ -385,7 +394,7 @@ extract_features.pcaComponents <- function(features){
   # plot percentage of variance explained for each principal component    
   p.plot <- barplot(100*p.variance.explained[1:12], las=2, xlab='', ylab='% Variance Explained')
   
-  return(list(p.plot, new_data))
+  return(list(p.plot, new_data, scaled_data))
 }
 
 
