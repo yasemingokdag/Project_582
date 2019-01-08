@@ -33,6 +33,7 @@ odd_details=details_data_preprocessing(odd_details_raw,matches)
 # extract open and close odd type features from multiple bookmakers
 features=extract_features.CombineFeatures(matches,odd_details,pMissThreshold=rem_miss_threshold,trainStart,testStart)
 
+features2=extract_features.openclose(matches,odd_details,pMissThreshold=rem_miss_threshold,trainStart,testStart)
 
 # divide data based on the provided dates 
 train_features=features[Match_Date>=trainStart & Match_Date<testStart] 
@@ -45,13 +46,34 @@ predictions=train_glmnet(train_features, test_features,not_included_feature_indi
 MatchDate=matches[,c('matchId','Match_Date','Home','Away'),with=F]
 
 PredictionTable=predictions$predictions
+PredictionTable= PredictionTable[!is.na(Match_Result)]
 
+PredictionTable=PredictionTable[matchId!='KhFrDF1M']
+PredictionTable[,c(3:5),with=F]
+Outcomes=PredictionTable
+Outcomes[Match_Result=='Away',Away:=1]
+Outcomes[Match_Result=='Away',Home:=0]
+Outcomes[Match_Result=='Away',Tie:=0]
+
+Outcomes[Match_Result=='Home',Away:=0]
+Outcomes[Match_Result=='Home',Home:=1]
+Outcomes[Match_Result=='Home',Tie:=0]
+
+Outcomes[Match_Result=='Tie',Away:=0]
+Outcomes[Match_Result=='Tie',Home:=0]
+Outcomes[Match_Result=='Tie',Tie:=1]
+
+Matler=PredictionTable$matchId
+PredictionTable
 
 setkey(MatchDate,matchId)
 setkey(PredictionTable,matchId)
 
 MatchDate[PredictionTable][order(Match_Date)]
 
-PredictionTable
+
+mean(RPS_matrix(PredictionTable[,c(3:5),with=F],Outcomes[,c(3:5),with=F]))
+
+
 
 
