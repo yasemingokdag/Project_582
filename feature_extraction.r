@@ -386,7 +386,15 @@ extract_features.pcaComponents <- function(train_features, test_features){
   t <- as.matrix(t)
   
   r <- t%*%load
-  new_data <- cbind(s,r)
+  new_data_test <- cbind(s,r)
+  
+  s_2 <- scaled_data[,1:5]
+  t_2 <- scaled_data[,6:ncol(scaled_data)]
+  t_2 <- as.matrix(t)
+  
+  r_2 <- t_2%*%load
+  new_data_train <- cbind(s_2,r_2)
+  
   
   loadings = pca_prin$loadings[]
   p.variance.explained = pca_prin$sdev^2 / sum(pca_prin$sdev^2)
@@ -394,7 +402,7 @@ extract_features.pcaComponents <- function(train_features, test_features){
   # plot percentage of variance explained for each principal component    
   p.plot <- barplot(100*p.variance.explained[1:12], las=2, xlab='', ylab='% Variance Explained')
   
-  return(list(p.plot, new_data, scaled_data))
+  return(list(p.plot, new_data_test, new_data_train))
 }
 
 
